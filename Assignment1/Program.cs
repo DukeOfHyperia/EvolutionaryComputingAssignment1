@@ -14,7 +14,7 @@ namespace GA
 
             int generation = 1;
             Console.WriteLine("Generation {0}\n", generation);
-            GeneticAlgorithm ga = new GeneticAlgorithm(100, 50, 2, 1);
+            GeneticAlgorithm ga = new GeneticAlgorithm(100, 50, 1, 1);
             List<Individual> Population = ga.GenerateInitialPopulation();
 
             List<float> GenerationFittest = new List<float>(); //store the fittest value from each generation
