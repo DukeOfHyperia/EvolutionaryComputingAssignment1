@@ -14,11 +14,11 @@ namespace GA
 
             int generation = 1;
             Console.WriteLine("Generation {0}\n", generation);
-            GeneticAlgorithm ga = new GeneticAlgorithm(100, 250, 1, 1);
-            List<Genotype> Population = ga.GenerateInitialPopulation();
+            GeneticAlgorithm ga = new GeneticAlgorithm(100, 50, 2, 1);
+            List<Individual> Population = ga.GenerateInitialPopulation();
 
             List<float> GenerationFittest = new List<float>(); //store the fittest value from each generation
-            Genotype Fittest = ga.GetFittest(Population);
+            Individual Fittest = ga.GetFittest(Population);
 
             float CurrentFittest = Fittest.Fitness;
             GenerationFittest.Add(CurrentFittest); //add fittest value from initial population/generation 1
@@ -30,12 +30,12 @@ namespace GA
                 generation++;
                 MaxFittest = CurrentFittest;
 
-                List<Genotype> Offspring = ga.Recombination(Population);
-                List<Genotype> NextGeneration = ga.GenerateNextGeneration(Population, Offspring, generation); //selection
+                List<Individual> Offspring = ga.Recombination(Population);
+                List<Individual> NextGeneration = ga.GenerateNextGeneration(Population, Offspring, generation); //selection
                 
-                Genotype RunFittest = ga.GetFittest(NextGeneration);
+                Individual RunFittest = ga.GetFittest(NextGeneration);
                 CurrentFittest = RunFittest.Fitness;
-                Solution = RunFittest.binarystring;
+                Solution = RunFittest.Binarystring;
 
                 GenerationFittest.Add(CurrentFittest);
             }
@@ -68,15 +68,15 @@ namespace GA
             crossovertype = crossoverType;
         }
 
-        public List<Genotype> GenerateInitialPopulation()
+        public List<Individual> GenerateInitialPopulation()
         {
-            List<Genotype> Population = new List<Genotype>();
+            List<Individual> Population = new List<Individual>();
             for (int i = 0; i < N; i++)
             {
-                Genotype gn = new Genotype();
-                gn.binarystring = RandomBinary(l);
-                gn.Fitness = CalculateFitness(gn.binarystring);
-                Console.WriteLine(gn.binarystring + " --> " + gn.Fitness);
+                Individual gn = new Individual();
+                gn.Binarystring = RandomBinary(l);
+                gn.Fitness = CalculateFitness(gn.Binarystring);
+                Console.WriteLine(gn.Binarystring + " --> " + gn.Fitness);
                 Population.Add(gn);
             }
             return Population;
@@ -110,28 +110,28 @@ namespace GA
             return fitnessvalue;
         }
 
-        public List<Genotype> Recombination(List<Genotype> ParentPopulation)
+        public List<Individual> Recombination(List<Individual> ParentPopulation)
         {
-            List<Genotype> Offspring = new List<Genotype>();
+            List<Individual> Offspring = new List<Individual>();
             for (int i = 0; i < N; i += 2)
             {
-                DoCrossover((Genotype)ParentPopulation[i], (Genotype)ParentPopulation[i + 1], Offspring);
+                DoCrossover((Individual)ParentPopulation[i], (Individual)ParentPopulation[i + 1], Offspring);
             }
 
             Console.WriteLine("\nOffspring\n");
             for (int i = 0; i < N; i++)
             {
-                Genotype child = (Genotype)Offspring[i];
-                Console.WriteLine(child.binarystring + " --> " + child.Fitness);
+                Individual child = (Individual)Offspring[i];
+                Console.WriteLine(child.Binarystring + " --> " + child.Fitness);
             }
 
             return Offspring;
         }
 
-        public void DoCrossover(Genotype parent1, Genotype parent2, List<Genotype> Offspring)
+        public void DoCrossover(Individual parent1, Individual parent2, List<Individual> Offspring)
         {
-            Genotype child1 = new Genotype();
-            Genotype child2 = new Genotype();
+            Individual child1 = new Individual();
+            Individual child2 = new Individual();
             if (crossovertype == 1) //UX
             {
                 for (int i = 0; i < l; i++)
@@ -139,45 +139,68 @@ namespace GA
                     bool flip = rand.NextDouble() >= 0.5; //get random true or false
                     if (flip)
                     {
-                        child1.binarystring += parent2.binarystring[i];
-                        child2.binarystring += parent1.binarystring[i];
+                        child1.Binarystring += parent2.Binarystring[i];
+                        child2.Binarystring += parent1.Binarystring[i];
                     }
                     else
                     {
-                        child1.binarystring += parent1.binarystring[i];
-                        child2.binarystring += parent2.binarystring[i];
+                        child1.Binarystring += parent1.Binarystring[i];
+                        child2.Binarystring += parent2.Binarystring[i];
                     }
                 }
             }
-            else if (functiontype == 2) //2X
+            else if (crossovertype == 2) //2X
             {
-                //will be added later
+                Random cp = new Random();
+
+                int crossoverpoint1 = cp.Next(0, 49); //get random number for 2 crossover points
+                int crossoverpoint2 = cp.Next(50, 99);
+                //while (crossoverpoint1 >= crossoverpoint2)
+                //{
+                //    crossoverpoint2 = cp.Next(0, 100);
+                //}
+
+                for (int i = 0; i < crossoverpoint1; i++)
+                {
+                    child1.Binarystring += parent1.Binarystring[i];
+                    child2.Binarystring += parent2.Binarystring[i];
+                }
+                for (int i = crossoverpoint1; i < crossoverpoint2; i++)
+                {
+                    child1.Binarystring += parent2.Binarystring[i];
+                    child2.Binarystring += parent1.Binarystring[i];
+                }
+                for (int i = crossoverpoint2; i < l; i++)
+                {
+                    child1.Binarystring += parent1.Binarystring[i];
+                    child2.Binarystring += parent2.Binarystring[i];
+                }
             }
-            child1.Fitness = CalculateFitness(child1.binarystring);
-            child2.Fitness = CalculateFitness(child2.binarystring);
+            child1.Fitness = CalculateFitness(child1.Binarystring);
+            child2.Fitness = CalculateFitness(child2.Binarystring);
             Offspring.Add(child1);
             Offspring.Add(child2);
         }
 
-        public List<Genotype> GenerateNextGeneration(List<Genotype> InitialPopulation, List<Genotype> GeneratedOffspring, int generation)
+        public List<Individual> GenerateNextGeneration(List<Individual> InitialPopulation, List<Individual> GeneratedOffspring, int generation)
         {
-            List<Genotype> NplusN = InitialPopulation;
+            List<Individual> NplusN = InitialPopulation;
             NplusN.AddRange(GeneratedOffspring);
-            List<Genotype> SelectedNplusN = NplusN.OrderByDescending(x => x.Fitness).Take(N).ToList();
+            List<Individual> SelectedNplusN = NplusN.OrderByDescending(x => x.Fitness).Take(N).ToList();
 
             Console.WriteLine("\nGeneration {0}\n", generation);
             for (int i = 0; i < N; i++)
             {
-                Genotype gn = (Genotype)SelectedNplusN[i];
-                Console.WriteLine(gn.binarystring + " --> " + gn.Fitness);
+                Individual gn = (Individual)SelectedNplusN[i];
+                Console.WriteLine(gn.Binarystring + " --> " + gn.Fitness);
             }
 
             return NplusN;
         }
 
-        public Genotype GetFittest(List<Genotype> Population)
+        public Individual GetFittest(List<Individual> Population)
         {
-            Genotype fittest = Population.OrderByDescending(x => x.Fitness).First();
+            Individual fittest = Population.OrderByDescending(x => x.Fitness).First();
             Console.WriteLine("Fittest :{0}", fittest.Fitness);
             return fittest;
         }
@@ -191,9 +214,9 @@ namespace GA
         }
     }
 
-    class Genotype
+    class Individual
     {
-        public string binarystring { get; set; }
+        public string Binarystring { get; set; }
         public float Fitness { get; set; }
     }
 }
