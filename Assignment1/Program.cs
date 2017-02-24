@@ -10,19 +10,6 @@ namespace GA
     {
         static void Main()
         {
-            GeneticAlgorithm ga = new GeneticAlgorithm(100, 1, 1);
-
-            CostFunction cf = null;
-
-            for(int i = 0; i < 60; i++)
-            {
-                if (i % 5 == 0)
-                    cf = new CostFunction(i / 10 + 1);
-                String input = ga.generateBinString();
-                Console.WriteLine(input + " => " + cf.getFitnessValue(input));
-
-            }
-        Console.ReadLine();
         }
     }
 
@@ -32,16 +19,6 @@ namespace GA
         public GeneticAlgorithm(int N, int crossoverType, int costFunction)
         {
             // Enter here the code for the genetic algorithm
-        }
-
-        public String generateBinString()
-        {
-            Thread.Sleep(1);
-            Random rand = new Random(DateTime.Now.Millisecond);
-            String output = "";
-            for (int i = 0; i < 100; i++)
-                output += rand.Next(0, 2);
-            return output;
         }
 
     }
