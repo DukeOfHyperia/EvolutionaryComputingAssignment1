@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 
 namespace GA
 {
@@ -14,7 +14,7 @@ namespace GA
 
             int generation = 1;
             Console.WriteLine("Generation {0}\n", generation);
-            GeneticAlgorithm ga = new GeneticAlgorithm(100, 150, 1, 1);
+            GeneticAlgorithm ga = new GeneticAlgorithm(100, 50, 1, 1);
             List<Individual> Population = ga.GenerateInitialPopulation();
 
             List<double> GenerationFittest = new List<double>(); //store the fittest value from each generation
@@ -25,14 +25,14 @@ namespace GA
 
             double MaxFittest = 0; //store maximum fittest value
             string Solution = "";
-            while (generation < 100) //same solution or there is no difference between generation
+            while (generation < 50)
             {
                 generation++;
                 MaxFittest = CurrentFittest;
 
                 List<Individual> Offspring = ga.Recombination(Population);
                 List<Individual> NextGeneration = ga.GenerateNextGeneration(Population, Offspring, generation); //selection
-                
+
                 Individual RunFittest = ga.GetFittest(NextGeneration);
                 CurrentFittest = RunFittest.Fitness;
                 Solution = RunFittest.Binarystring;
@@ -49,7 +49,7 @@ namespace GA
 
             Console.WriteLine("Solution found!");
             Console.WriteLine("Generation: {0}", generation);
-            Console.WriteLine("Fitness Value: {0}\nGenotype: {1}", MaxFittest, Solution);
+            Console.WriteLine("Fitness Value: {0}\Individual: {1}", MaxFittest, Solution);
             Console.ReadLine();
         }
     }
@@ -58,14 +58,14 @@ namespace GA
     {
         int l;
         int N;
-        int functiontype;
+        CostFunction cf;
         int crossovertype;
         public GeneticAlgorithm(int stringLength, int populationSize, int crossoverType, int costFunction)
         {
             // Enter here the code for the genetic algorithm
             l = stringLength;
             N = populationSize;
-            functiontype = costFunction;
+            cf = new CostFunction(costFunction);
             crossovertype = crossoverType;
         }
 
@@ -76,7 +76,7 @@ namespace GA
             {
                 Individual gn = new Individual();
                 gn.Binarystring = RandomBinary(l);
-                gn.Fitness = CalculateFitness(gn.Binarystring);
+                gn.Fitness = cf.getFitnessValue(gn.Binarystring);
                 Console.WriteLine(gn.Binarystring + " --> " + gn.Fitness);
                 Population.Add(gn);
             }
@@ -97,36 +97,20 @@ namespace GA
             return result;
         }
 
-        public double CalculateFitness(string binarystring)
-        {
-            //testing using the first function
-            double fitnessvalue = 0;
-            switch (functiontype)
-            {
-                case 1:
-                    fitnessvalue = binarystring.Select(x => (int)x - '0').Sum();
-                    break;
-            }
-
-            return fitnessvalue;
-        }
-
         public List<Individual> Recombination(List<Individual> ParentPopulation)
         {
-            //shuffle the parent population
-            //
             List<Individual> Offspring = new List<Individual>();
             for (int i = 0; i < N; i += 2)
             {
                 DoCrossover((Individual)ParentPopulation[i], (Individual)ParentPopulation[i + 1], Offspring);
             }
 
-            //Console.WriteLine("\nOffspring\n");
-            //for (int i = 0; i < N; i++)
-            //{
-            //    Individual child = (Individual)Offspring[i];
-            //    Console.WriteLine(child.Binarystring + " --> " + child.Fitness);
-            //}
+            Console.WriteLine("\nOffspring\n");
+            for (int i = 0; i < N; i++)
+            {
+                Individual child = (Individual)Offspring[i];
+                Console.WriteLine(child.Binarystring + " --> " + child.Fitness);
+            }
 
             return Offspring;
         }
@@ -159,7 +143,6 @@ namespace GA
                 int crossoverpoint1 = cp.Next(0, 99); //get random number for 2 crossover points
                 int crossoverpoint2 = cp.Next(crossoverpoint1, 100);
 
-
                 for (int i = 0; i < crossoverpoint1; i++)
                 {
                     child1.Binarystring += parent1.Binarystring[i];
@@ -176,23 +159,34 @@ namespace GA
                     child2.Binarystring += parent2.Binarystring[i];
                 }
             }
-            child1.Fitness = CalculateFitness(child1.Binarystring);
-            child2.Fitness = CalculateFitness(child2.Binarystring);
+            child1.Fitness = cf.getFitnessValue(child1.Binarystring);
+            child2.Fitness = cf.getFitnessValue(child2.Binarystring);
             Offspring.Add(child1);
             Offspring.Add(child2);
         }
 
         public List<Individual> GenerateNextGeneration(List<Individual> InitialPopulation, List<Individual> GeneratedOffspring, int generation)
         {
-            List<Individual> NplusN = InitialPopulation; 
-            NplusN.AddRange(GeneratedOffspring); 
+            List<Individual> NplusN = InitialPopulation;
+            NplusN.AddRange(GeneratedOffspring);
             NplusN = NplusN.OrderByDescending(x => x.Fitness).Take(N).ToList();
 
-            Console.WriteLine("\nGeneration {0}\n", generation);
-            for (int i = 0; i < N; i++)
+            //Console.WriteLine("\nGeneration {0}\n", generation);
+            //for (int i = 0; i < N; i++)
+            //{
+            //    Individual gn = (Individual)NplusN[i];
+            //    Console.WriteLine(gn.Binarystring + " --> " + gn.Fitness);
+            //}
+
+            // randomize the population
+            int n = NplusN.Count;
+            while (n > 1)
             {
-                Individual gn = (Individual)NplusN[i];
-                Console.WriteLine(gn.Binarystring + " --> " + gn.Fitness);
+                n--;
+                int k = rand.Next(n + 1);
+                Individual value = NplusN[k];
+                NplusN[k] = NplusN[n];
+                NplusN[n] = value;
             }
 
             return NplusN;
@@ -204,13 +198,105 @@ namespace GA
             Console.WriteLine("Fittest :{0}", fittest.Fitness);
             return fittest;
         }
-
     }
 
     class CostFunction
     {
-        public CostFunction()
+        int id;
+        List<int> randomIndices;
+
+        public CostFunction(int functionID)
         {
+            id = functionID;
+            if (id == 5 || id == 6)
+                randomIndices = createRandomlyLinked();
+        }
+
+        public double getFitnessValue(String input)
+        {
+            switch (id)
+            {
+                case 1:
+                    return CO(input);
+                case 2:
+                    return SCO(input);
+                case 3:
+                    return TF(input, false);
+                case 4:
+                    return TF(input, false, 2.5);
+                case 5:
+                    return TF(input, true);
+                case 6:
+                    return TF(input, true, 2.5);
+                default:
+                    return -1;
+            }
+        }
+
+        // Uniform Scaled Counting Ones Function
+        private double CO(String input)
+        {
+            double result = 0;
+            for (int i = 0; i < input.Length; i++)
+                result += Convert.ToDouble(input[i].ToString());
+            return result;
+        }
+        // Linearly Scaled Counting Ones Function
+        private double SCO(String input)
+        {
+            double result = 0;
+            for (int i = 0; i < input.Length; i++)
+                result += Convert.ToDouble(input[i] * (i + 1));
+            return result;
+        }
+        // Trap Function
+        private double TF(String input, Boolean random, double d = 1)
+        {
+            int k = 4;
+            double result = 0;
+            for (int i = 0; i < input.Length; i += k)
+            {
+                double ones;
+                if (!random)
+                    ones = CO(input.Substring(i, k));
+                else
+                {
+                    String randomInput = "";
+                    for (int j = 0; j < k; j++)
+                        randomInput += input[randomIndices[i + j]];
+
+                    ones = CO(randomInput);
+                }
+
+                if (ones == k)
+                    result += k;
+                else
+                    result += k - d - ((k - d) / (k - 1)) * ones;
+            }
+            return result;
+
+        }
+
+        private List<int> createRandomlyLinked()
+        {
+            List<int> indices = new List<int>();
+            for (int i = 0; i < 100; i++)
+                indices.Add(i);
+
+            Random rand = new Random(DateTime.Now.Millisecond);
+
+            // randomize the indices
+            int n = indices.Count;
+            while (n > 1)
+            {
+                n--;
+                int k = rand.Next(n + 1);
+                int value = indices[k];
+                indices[k] = indices[n];
+                indices[n] = value;
+            }
+
+            return indices;
         }
     }
 
