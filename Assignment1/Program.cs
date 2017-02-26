@@ -14,18 +14,18 @@ namespace GA
 
             int generation = 1;
             Console.WriteLine("Generation {0}\n", generation);
-            GeneticAlgorithm ga = new GeneticAlgorithm(100, 50, 1, 1);
+            GeneticAlgorithm ga = new GeneticAlgorithm(100, 150, 1, 1);
             List<Individual> Population = ga.GenerateInitialPopulation();
 
-            List<float> GenerationFittest = new List<float>(); //store the fittest value from each generation
+            List<double> GenerationFittest = new List<double>(); //store the fittest value from each generation
             Individual Fittest = ga.GetFittest(Population);
 
-            float CurrentFittest = Fittest.Fitness;
+            double CurrentFittest = Fittest.Fitness;
             GenerationFittest.Add(CurrentFittest); //add fittest value from initial population/generation 1
 
-            float MaxFittest = 0; //store maximum fittest value
+            double MaxFittest = 0; //store maximum fittest value
             string Solution = "";
-            while (CurrentFittest > MaxFittest)
+            while (generation < 100) //same solution or there is no difference between generation
             {
                 generation++;
                 MaxFittest = CurrentFittest;
@@ -38,6 +38,7 @@ namespace GA
                 Solution = RunFittest.Binarystring;
 
                 GenerationFittest.Add(CurrentFittest);
+                Population = NextGeneration;
             }
 
             Console.WriteLine("\n");
@@ -96,10 +97,10 @@ namespace GA
             return result;
         }
 
-        public float CalculateFitness(string binarystring)
+        public double CalculateFitness(string binarystring)
         {
             //testing using the first function
-            float fitnessvalue = 0;
+            double fitnessvalue = 0;
             switch (functiontype)
             {
                 case 1:
@@ -112,18 +113,20 @@ namespace GA
 
         public List<Individual> Recombination(List<Individual> ParentPopulation)
         {
+            //shuffle the parent population
+            //
             List<Individual> Offspring = new List<Individual>();
             for (int i = 0; i < N; i += 2)
             {
                 DoCrossover((Individual)ParentPopulation[i], (Individual)ParentPopulation[i + 1], Offspring);
             }
 
-            Console.WriteLine("\nOffspring\n");
-            for (int i = 0; i < N; i++)
-            {
-                Individual child = (Individual)Offspring[i];
-                Console.WriteLine(child.Binarystring + " --> " + child.Fitness);
-            }
+            //Console.WriteLine("\nOffspring\n");
+            //for (int i = 0; i < N; i++)
+            //{
+            //    Individual child = (Individual)Offspring[i];
+            //    Console.WriteLine(child.Binarystring + " --> " + child.Fitness);
+            //}
 
             return Offspring;
         }
@@ -153,12 +156,9 @@ namespace GA
             {
                 Random cp = new Random();
 
-                int crossoverpoint1 = cp.Next(0, 49); //get random number for 2 crossover points
-                int crossoverpoint2 = cp.Next(50, 99);
-                //while (crossoverpoint1 >= crossoverpoint2)
-                //{
-                //    crossoverpoint2 = cp.Next(0, 100);
-                //}
+                int crossoverpoint1 = cp.Next(0, 99); //get random number for 2 crossover points
+                int crossoverpoint2 = cp.Next(crossoverpoint1, 100);
+
 
                 for (int i = 0; i < crossoverpoint1; i++)
                 {
@@ -184,14 +184,14 @@ namespace GA
 
         public List<Individual> GenerateNextGeneration(List<Individual> InitialPopulation, List<Individual> GeneratedOffspring, int generation)
         {
-            List<Individual> NplusN = InitialPopulation;
-            NplusN.AddRange(GeneratedOffspring);
-            List<Individual> SelectedNplusN = NplusN.OrderByDescending(x => x.Fitness).Take(N).ToList();
+            List<Individual> NplusN = InitialPopulation; 
+            NplusN.AddRange(GeneratedOffspring); 
+            NplusN = NplusN.OrderByDescending(x => x.Fitness).Take(N).ToList();
 
             Console.WriteLine("\nGeneration {0}\n", generation);
             for (int i = 0; i < N; i++)
             {
-                Individual gn = (Individual)SelectedNplusN[i];
+                Individual gn = (Individual)NplusN[i];
                 Console.WriteLine(gn.Binarystring + " --> " + gn.Fitness);
             }
 
@@ -217,6 +217,6 @@ namespace GA
     class Individual
     {
         public string Binarystring { get; set; }
-        public float Fitness { get; set; }
+        public double Fitness { get; set; }
     }
 }
