@@ -14,7 +14,7 @@ namespace GA
 
             int generation = 1;
             Console.WriteLine("Generation {0}\n", generation);
-            GeneticAlgorithm ga = new GeneticAlgorithm(100, 50, 1, 1);
+            GeneticAlgorithm ga = new GeneticAlgorithm(100, 50, 1, 2);
             List<Individual> Population = ga.GenerateInitialPopulation();
 
             List<double> GenerationFittest = new List<double>(); //store the fittest value from each generation
@@ -25,7 +25,7 @@ namespace GA
 
             double MaxFittest = 0; //store maximum fittest value
             string Solution = "";
-            while (generation < 50)
+            while (generation < 100)
             {
                 generation++;
                 MaxFittest = CurrentFittest;
@@ -238,7 +238,7 @@ namespace GA
         {
             double result = 0;
             for (int i = 0; i < input.Length; i++)
-                result += Convert.ToDouble(input[i].ToString());
+                result += Char.GetNumericValue(input[i]);
             return result;
         }
         // Linearly Scaled Counting Ones Function
@@ -246,7 +246,9 @@ namespace GA
         {
             double result = 0;
             for (int i = 0; i < input.Length; i++)
-                result += Convert.ToDouble(input[i] * (i + 1));
+            {
+                result += Char.GetNumericValue(input[i]) * (i + 1);
+            }
             return result;
         }
         // Trap Function
