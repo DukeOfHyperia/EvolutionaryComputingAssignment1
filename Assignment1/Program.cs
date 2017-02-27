@@ -19,8 +19,6 @@ namespace GA
             Individual Fittest = ga.GetFittest(Population); //get the individual having the fittest value from initial the population
             double CurrentFittest = Fittest.Fitness; 
             GenerationFittest.Add(CurrentFittest); 
-
-            double MaxFittest = 0; //fitness value of the solution
             string Solution = ""; //binarystring of the solution
             
             double lowestparent = 0;
@@ -32,7 +30,7 @@ namespace GA
                 List<Individual> Offspring = ga.Recombination(Population); //do recombination (crossover)
                 List<Individual> NextGeneration = ga.GenerateNextGeneration(Population, Offspring, generation); //do selection
 
-                Individual RunFittest = ga.GetFittest(NextGeneration);
+                Individual RunFittest = ga.GetFittest(NextGeneration); //ge the fittest individual from population
                 CurrentFittest = RunFittest.Fitness;
                 Solution = RunFittest.Binarystring;
 
@@ -53,7 +51,7 @@ namespace GA
 
             Console.WriteLine("Solution found!");
             Console.WriteLine("Generation: {0}", generation);
-            Console.WriteLine("Fitness Value: {0}\nIndividual: {1}", MaxFittest, Solution);
+            Console.WriteLine("Fitness Value: {0}\nIndividual: {1}", CurrentFittest, Solution);
             Console.ReadLine();
         }
     }
