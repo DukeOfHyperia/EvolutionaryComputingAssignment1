@@ -53,14 +53,18 @@ namespace GA
             succes = 0;
         }
 
-        public void AddRun(int FirstHit, int Converge, int FctEvals, int CPUTime, Boolean Succes)
+        public void AddRun(Tuple<int,int,int,int> data)
         {
-            firstHit.Add(FirstHit);
-            converge.Add(Converge);
-            fctEvals.Add(FctEvals);
-            cpuTime.Add(CPUTime);
-            if (Succes)
+            if (data.Item1 != -1)
+            {
                 succes++;
+                firstHit.Add(data.Item1);
+            }
+
+            converge.Add(data.Item2);
+            fctEvals.Add(data.Item3);
+            cpuTime.Add(data.Item4);
+
         }
         public void outputResults()
         {
@@ -70,16 +74,24 @@ namespace GA
             Console.WriteLine("First hit: " + calculateStatistics(firstHit));
             Console.WriteLine("Converge : " + calculateStatistics(converge));
             Console.WriteLine("Fct Evals: " + calculateStatistics(fctEvals));
-            Console.WriteLine("CPU time : " + calculateStatistics(cpuTime));
+            Console.WriteLine("CPU time : " + calculateStatistics(cpuTime) + "ms");
+            Console.WriteLine("");
         }
 
-        private Tuple<double, double> calculateStatistics(List<int> data)
+        private String calculateStatistics(List<int> data)
         {
-            double avg = data.Average();
-            double std = Math.Sqrt(data.Select(x => (x - avg) * (x - avg)).Sum() / (data.Count - 1));
-
-            Console.Write(avg + " (" + std + ")");
-            return new Tuple<double, double>(avg, std);
+            if (data.Count != 0)
+            {
+                double avg = data.Average();
+                double std;
+                if (data.Count > 1)
+                    std = Math.Sqrt(data.Select(x => (x - avg) * (x - avg)).Sum() / (data.Count - 1));
+                else
+                    std = 0;
+                return avg + " (" + std + ")";
+            }
+            return "NA (NA)";
+            
         }
     }
 }
