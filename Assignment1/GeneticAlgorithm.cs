@@ -11,6 +11,7 @@ namespace GA
         int l, N, crossoverType;
         public FitnessFunction ff;
         public string globalOptimum;
+        public double globalOptimumFitness;
 
         public GeneticAlgorithm(int StringLength, int PopulationSize, int CrossoverType, int fitnessFunction)
         {
@@ -48,6 +49,8 @@ namespace GA
         {
             for (int i = 0; i < l; i++)
                 globalOptimum += "1";
+
+            globalOptimumFitness = ff.getFitnessValue(globalOptimum);
         }
 
         //generate offspring by doing crossover
@@ -82,23 +85,28 @@ namespace GA
             }
             else if (crossoverType == 2) //2X (2-Point Crossover)
             {
-                Random cp = new Random();
+                Random rand = new Random();
 
                 //get random 2 crossover points from 0 - 100
-                int crossoverpoint1 = cp.Next(0, 99);
-                int crossoverpoint2 = cp.Next(crossoverpoint1, 100);
+                int random1 = rand.Next(0, l);
+                int random2 = random1;
+                while (random2 == random1)
+                    random2 = rand.Next(0, l);
 
-                for (int i = 0; i < crossoverpoint1; i++)
+                int cp1 = Math.Min(random1, random2);
+                int cp2 = Math.Max(random1, random2);
+
+                for (int i = 0; i < cp1; i++)
                 {
                     child1.Binarystring += parent1.Binarystring[i];
                     child2.Binarystring += parent2.Binarystring[i];
                 }
-                for (int i = crossoverpoint1; i < crossoverpoint2; i++)
+                for (int i = cp1; i < cp2; i++)
                 {
                     child1.Binarystring += parent2.Binarystring[i];
                     child2.Binarystring += parent1.Binarystring[i];
                 }
-                for (int i = crossoverpoint2; i < l; i++)
+                for (int i = cp2; i < l; i++)
                 {
                     child1.Binarystring += parent1.Binarystring[i];
                     child2.Binarystring += parent2.Binarystring[i];

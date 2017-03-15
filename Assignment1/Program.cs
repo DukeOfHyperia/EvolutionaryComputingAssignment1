@@ -23,7 +23,7 @@ namespace GA
                     {
                         Evaluation eval = new Evaluation(size[p], c, f);
                         // run 25 times
-                        for(int i = 0; i < 24; i++)
+                        for(int i = 0; i < 25; i++)
                             eval.AddRun(Execute(new GeneticAlgorithm(100, size[p], c, f)));
                         eval.outputResults();
                     }
@@ -47,18 +47,19 @@ namespace GA
             {
                 generation++;
                 List<Individual> offspring = ga.Recombination(population); //do recombination (crossover)
-                List<Individual> nextGeneration = ga.GenerateNextGeneration(population, offspring); //do selection
-
-                Individual runFittest = ga.GetFittest(nextGeneration); //ge the fittest individual from population
-
-                if (runFittest.Binarystring == ga.globalOptimum && firstHit == -1)
-                    firstHit = generation;
 
                 lowestParent = population.Select(x => x.Fitness).Min();
                 highestChild = offspring.Select(x => x.Fitness).Max();
 
                 if (highestChild <= lowestParent)
                     break;
+
+                List<Individual> nextGeneration = ga.GenerateNextGeneration(population, offspring); //do selection
+
+                Individual runFittest = ga.GetFittest(nextGeneration); //ge the fittest individual from population
+
+                if (runFittest.Binarystring == ga.globalOptimum && firstHit == -1)
+                    firstHit = generation;
 
                 population = nextGeneration;
             }

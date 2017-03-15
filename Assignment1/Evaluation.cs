@@ -76,6 +76,15 @@ namespace GA
             Console.WriteLine("Fct Evals: " + calculateStatistics(fctEvals));
             Console.WriteLine("CPU time : " + calculateStatistics(cpuTime) + "ms");
             Console.WriteLine("");
+
+            // Output LaTeX-code for tables
+            /*Console.WriteLine(" & " + String.Join(" & ", populationSize,
+                                                            succes + "/25",
+                                                            calculateStatistics(firstHit),
+                                                            calculateStatistics(converge),
+                                                            calculateStatistics(fctEvals),
+                                                            calculateStatistics(cpuTime)) + " \\\\");
+            Console.WriteLine("");*/
         }
 
         private String calculateStatistics(List<int> data)
@@ -88,7 +97,7 @@ namespace GA
                     std = Math.Sqrt(data.Select(x => (x - avg) * (x - avg)).Sum() / (data.Count - 1));
                 else
                     std = 0;
-                return avg + " (" + std + ")";
+                return (Math.Round(avg, 2) + " (" + Math.Round(std, 2) + ")").Replace(',', '.');
             }
             return "NA (NA)";
             
